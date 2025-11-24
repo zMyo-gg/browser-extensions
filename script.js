@@ -127,6 +127,17 @@ filterBtns.forEach(btn => {
     });
 });
 
+function getFilteredExtensions() {
+    if (currentFilter === 'all') {
+            return extensions;
+    }   else if (currentFilter === 'active') {
+            return extensions.filter(ext => ext.isActive === true);
+    }   else if (currentFilter === 'inactive') {
+            return extensions.filter(ext => ext.isActive === false);
+    }
+    return extensions;
+}
+
 function renderExtensions() {
     const filtered = getFilteredExtensions();
 
@@ -151,41 +162,90 @@ function renderExtensions() {
         </div>
         `).join('');
     
-    
-    document.querySelectorAll('.remove-btn').forEach(btn => {
-        btn,addEventListener('click', (e) => removeExtension(e.target.dataset.id));
-    });
-
-    document.querySelector('.toggle-switch').forEach(btn => {
-        btn.addEventListener('click', (e) => toggleExtension(e.target.dataset.id));
-    });
+        attachEventListeners();
 }
 
-function getFilteredExtensions() {
-    if (currentFilter === 'all') {
-        return extensions;
-    } else if (currentFilter === 'active') {
-        return extensions.filter(ext => ext.isActive);
-    } else{
-        return extensions.filter(ext => !ext.isACtive);
-    }
+function attachEventListeners() {
+
+    const removeButtons = document.querySelectorAll('.remove-btn');
+    console.log('Remove buttons :', removeButtons.length);
+
+    removeButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            console.log('Click en remove');
+            e.preventDefault();
+            e.stopPropagation();
+
+            const id = parseInt(this.getAttribute('data-id'));
+            console.log('Eliminando extensión con ID:', id);
+
+            removeExtension(id);
+        });
+    });
+
+    
+    const toggleButtons = document.querySelectorAll('.toggle-switch');
+    console.log('Toggle buttons :', toggleButtons.length);
+
+    toggleButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const id = parseInt(this.getAttribute('data-id'));
+            console.log('Toggle extensión con ID:', id);
+
+            toggleExtension(id);
+        });
+    });
 }
 
 function removeExtension(id) {
-    const index = extensions.findIndex(ext => ext.id === parseInt(id));
+    console.log('removeExtension call ID:', id);
+
+    
+    const index = extensions.findIndex(ext => ext.id === id);
+    console.log('Index found:', index);
+
     if (index > -1) {
-        extensions.splice(index, 1);
-        renderExtensions();
+        
+        const card = document.querySelector(`[data-id="${id}"]`);
+
+        if (card) {
+            console.log('Card found, starting animation');
+            
+            card.style.opacity = '0';
+            card.style.transform = 'scale(0.8)';
+            card.style.transition = 'all 0.3s ease';
+
+            
+            setTimeout(() => {
+                extensions.splice(index, 1);
+                console.log('Extension not found in array . Total:', extensions.length);
+                renderExtensions();
+            }, 300);
+        } else {
+            console.log('Card not found');
+            extensions.splice(index, 1);
+            renderExtensions();
+        }
+    } else {
+        console.log('Extension not found in array');
     }
 }
 
 function toggleExtension(id) {
-    const ext = extensions.find(e => e.id === parseInt(id));
+    console.log('toggleExtension call ID:', id);
+
+    const ext = extensions.find(e => e.id === id);
     if (ext) {
         ext.isActive = !ext.isActive;
+        console.log('Status changed a:', ext.isActive);
         renderExtensions();
     }
 }
 
+console.log('Initializing application...');
 loadTheme();
 renderExtensions();
+console.log('Initialized application. Total extensions:', extensions.length);

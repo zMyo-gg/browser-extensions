@@ -249,6 +249,11 @@ body.dark-mode .remove-btn {
     color: white;
 }
 
+body.dark-mode .remove-btn:hover {
+    background: var(--color-red-500);
+    color: black;
+}
+
 .toggle-switch {
     position: relative;
     width: 50px;
